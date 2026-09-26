@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマホ買い替え時期カレンダー登録</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f5f5f7; color: #333; }
+        .card { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        h1 { font-size: 20px; margin-bottom: 10px; }
+        p { font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.5; }
+        .info { background: #f0f4f8; padding: 15px; border-radius: 8px; text-align: left; font-size: 13px; margin-bottom: 20px; color: #444; line-height: 1.6; }
+        .btn { display: inline-block; width: 100%; padding: 16px 0; background: #007AFF; color: #fff; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,122,255,0.3); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>スマホ買い替え検討期間の登録</h1>
+        <p>下のボタンを押すと、お使いのスマホのカレンダーに予定（23か月後の1日〜25日／12:30通知）が追加されます。</p>
+        
+        <div class="info">
+            <strong>【取扱店舗】</strong><br>
+            てるてるランド朝霞店<br>
+            TEL: 048-485-8899<br>
+            営業時間: 10:00〜20:00
+        </div>
+
+        <div id="action-area"></div>
+    </div>
+
+    <script>
+        const now = new Date();
+        let targetYear = now.getFullYear();
+        let targetMonth = now.getMonth() + 23;
+
+        targetYear += Math.floor(targetMonth / 12);
+        targetMonth = targetMonth % 12;
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const yearStr = targetYear;
+        const monthStr = pad(targetMonth + 1);
+
+        const startIso = `${yearStr}${monthStr}01T123000`;
+        const endIso = `${yearStr}${monthStr}25T130000`;
+
+        const title = "スマホ買い替え検討期間";
+        const detailsText = "スマホの買い替え・機種変更のご案内期間です。\n\n【店舗情報】\nてるてるランド朝霞店\nTEL: 048-485-8899\n営業時間: 10:00〜20:00";
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const area = document.getElementById('action-area');
+
+        if (isIOS) {
+            const icsDetails = detailsText.replace(/\n/g, '\\n');
+            const icsData = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Shop//Event//EN',
+                'BEGIN:VEVENT',
+                `SUMMARY:${title}`,
+                `DESCRIPTION:${icsDetails}`,
+                `DTSTART:${startIso}`,
+                `DTEND:${endIso}`,
+                'BEGIN:VALARM',
+                'ACTION:DISPLAY',
+                'DESCRIPTION:Reminder',
+                'TRIGGER:PT0M',
+                'END:VALARM',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            area.innerHTML = `<a href="${url}" download="reminder.ics" class="btn">カレンダーに追加する</a>`;
+        } else {
+            const gTitle = encodeURIComponent(title);
+            const gDetails = encodeURIComponent(detailsText);
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gTitle}&dates=${startIso}/${endIso}&details=${gDetails}`;
+            area.innerHTML = `<a href="${calendarUrl}" class="btn">Googleカレンダーに追加する</a>`;
+        }
+    </script>
+</body>
+</html>
