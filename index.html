@@ -52,7 +52,6 @@
       appearance: none;
       -webkit-appearance: none;
     }
-    /* selectの矢印表示用調整 */
     select {
       background-image: url('data:image/svg+xml;utf8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
@@ -167,9 +166,8 @@
       const parts = contractInput.split('-');
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1; // 0-indexed
-      const day = parseInt(parts[2], 10);
 
-      // 開始月・年を計算
+      // 対象月・年を計算
       const targetDate = new Date(year, month + addMonths, 1);
       const targetYear = targetDate.getFullYear();
       const targetMonth = targetDate.getMonth(); // 0-indexed
@@ -178,10 +176,7 @@
       const startDate = new Date(targetYear, targetMonth, 3, 12, 30, 0);
       const endDate = new Date(targetYear, targetMonth, 3, 13, 0, 0);
 
-      // 繰り返し終了日（25日 23:59:59）
-      const untilDate = new Date(Date.UTC(targetYear, targetMonth, 25, 23, 59, 59));
-
-      // ローカル日時フォーマット (YYYYMMDDTHHmmss)
+      // フォーマット関数（YYYYMMDDTHHmmss）
       function formatLocalTime(d) {
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -191,28 +186,25 @@
         return `${yyyy}${mm}${dd}T${hh}${mi}00`;
       }
 
-      // UTC日時フォーマット (YYYYMMDDTHHmmssZ)
-      function formatUTCTime(d) {
-        const yyyy = d.getUTCFullYear();
-        const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const dd = String(d.getUTCDate()).padStart(2, '0');
-        const hh = String(d.getUTCHours()).padStart(2, '0');
-        const mi = String(d.getUTCMinutes()).padStart(2, '0');
-        const ss = String(d.getUTCSeconds()).padStart(2, '0');
-        return `${yyyy}${mm}${dd}T${hh}${mi}${ss}Z`;
+      // 日付フォーマット（YYYYMMDD）
+      function formatDateOnly(yyyy, mm, dd) {
+        const m = String(mm + 1).padStart(2, '0');
+        const d = String(dd).padStart(2, '0');
+        return `${yyyy}${m}${d}`;
       }
 
       const startLocal = formatLocalTime(startDate);
       const endLocal = formatLocalTime(endDate);
-      const untilUTC = formatUTCTime(untilDate);
+      const untilDateStr = formatDateOnly(targetYear, targetMonth, 25); // 25日まで
 
       const title = encodeURIComponent("【スマホ返却】手続き・次回機種変更のご確認");
       const details = encodeURIComponent("スマホ返却・更新手続きの受付期間です。\n店頭（てるランド新狭山店）にてご相談をお受けしております。");
       const location = encodeURIComponent("てるランド新狭山店");
 
-      // Google Calendar URL (RRULEパラメータの修正)
-      const rruleParam = encodeURIComponent(`FREQ=DAILY;UNTIL=${untilUTC}`);
-      const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=RRULE:${rruleParam}`;
+      // Google Calendar URL (RRULE:FREQ=DAILY;UNTIL=YYYYMMDD)
+      // Googleカレンダーで「毎日25日まで繰り返す」ためのパラメーター設定
+      const recurParam = encodeURIComponent(`RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`);
+      const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=${recurParam}`;
 
       // ICS Data (iPhone / 汎用)
       globalIcsData = [
@@ -225,7 +217,7 @@
         "LOCATION:てるランド新狭山店",
         `DTSTART:${startLocal}`,
         `DTEND:${endLocal}`,
-        `RRULE:FREQ=DAILY;UNTIL=${untilUTC}`,
+        `RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`,
         "END:VEVENT",
         "END:VCALENDAR"
       ].join("\r\n");
