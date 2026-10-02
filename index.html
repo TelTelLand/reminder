@@ -1,114 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマホ買い替え時期カレンダー登録</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f5f5f7; color: #333; }
-        .card { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h1 { font-size: 20px; margin-bottom: 10px; }
-        p { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
-        .select-group { margin-bottom: 20px; text-align: left; }
-        .select-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #444; }
-        .select-group select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; background: #fff; box-sizing: border-box; }
-        .info { background: #f0f4f8; padding: 15px; border-radius: 8px; text-align: left; font-size: 13px; margin-bottom: 20px; color: #444; line-height: 1.6; }
-        .btn { display: inline-block; width: 100%; padding: 16px 0; background: #007AFF; color: #fff; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,122,255,0.3); box-sizing: border-box; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>スマホ買い替え検討期間の登録</h1>
-        <p>購入後からの月数を選択し、下のボタンを押してカレンダーに予定を追加してください。</p>
-
-        <div class="select-group">
-            <label for="month-select">買い替え検討時期（購入後からの月数）:</label>
-            <select id="month-select">
-                <!-- 12〜48か月を選択可能 -->
-                <script>
-                    for (let i = 12; i <= 48; i++) {
-                        document.write(`<option value="${i}" ${i === 23 ? 'selected' : ''}>${i}か月後</option>`);
-                    }
-                </script>
-            </select>
-        </div>
-        
-        <div class="info">
-            <strong>【取扱店舗】</strong><br>
-            てるてるランド新狭山店<br>
-            TEL: 04-2933-9587<br>
-            営業時間: 10:00〜20:00<br>
-            <span style="font-size:11px; color:#666;">※通知設定: 当日および1週間前</span>
-        </div>
-
-        <div id="action-area"></div>
-    </div>
-
-    <script>
-        const monthSelect = document.getElementById('month-select');
-        const area = document.getElementById('action-area');
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-        function updateCalendarButton() {
-            const addedMonths = parseInt(monthSelect.value, 10);
-            const now = new Date();
-            let targetYear = now.getFullYear();
-            let targetMonth = now.getMonth() + addedMonths;
-
-            targetYear += Math.floor(targetMonth / 12);
-            targetMonth = targetMonth % 12;
-
-            const pad = (n) => String(n).padStart(2, '0');
-            const yearStr = targetYear;
-            const monthStr = pad(targetMonth + 1);
-
-            const startIso = `${yearStr}${monthStr}01T123000`;
-            const endIso = `${yearStr}${monthStr}25T130000`;
-
-            const title = "スマホ買い替え検討期間";
-            const detailsText = `スマホの買い替え・機種変更のご案内期間（${addedMonths}か月後）です。\n\n【店舗情報】\nてるてるランド新狭山店\nTEL: 04-2933-9587\n営業時間: 10:00〜20:00`;
-
-            if (isIOS) {
-                const icsDetails = detailsText.replace(/\n/g, '\\n');
-                const icsData = [
-                    'BEGIN:VCALENDAR',
-                    'VERSION:2.0',
-                    'PRODID:-//Shop//Event//EN',
-                    'BEGIN:VEVENT',
-                    `SUMMARY:${title}`,
-                    `DESCRIPTION:${icsDetails}`,
-                    `DTSTART:${startIso}`,
-                    `DTEND:${endIso}`,
-                    // アラーム1: イベント開始時 (0分前)
-                    'BEGIN:VALARM',
-                    'ACTION:DISPLAY',
-                    'DESCRIPTION:Reminder',
-                    'TRIGGER:PT0M',
-                    'END:VALARM',
-                    // アラーム2: 1週間前 (7日前)
-                    'BEGIN:VALARM',
-                    'ACTION:DISPLAY',
-                    'DESCRIPTION:Reminder',
-                    'TRIGGER:-P7D',
-                    'END:VALARM',
-                    'END:VEVENT',
-                    'END:VCALENDAR'
-                ].join('\r\n');
-
-                const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
-                const url = window.URL.createObjectURL(blob);
-                area.innerHTML = `<a href="${url}" download="reminder.ics" class="btn">カレンダーに追加する (${addedMonths}か月後)</a>`;
-            } else {
-                const gTitle = encodeURIComponent(title);
-                const gDetails = encodeURIComponent(detailsText);
-                const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gTitle}&dates=${startIso}/${endIso}&details=${gDetails}`;
-                area.innerHTML = `<a href="${calendarUrl}" target="_blank" class="btn">Googleカレンダーに追加する (${addedMonths}か月後)</a>`;
-            }
-        }
-
-        // 初期表示およびドロップダウン変更時にボタンを更新
-        monthSelect.addEventListener('change', updateCalendarButton);
-        updateCalendarButton();
-    </script>
-</body>
-</html>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#007AFF"><title>スマホ買い替え時期登録</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center;padding:32px 18px;background:#f5f5f7;color:#333}
+.card{background:#fff;padding:28px;border-radius:16px;box-shadow:0 4px 12px #0000001a;max-width:420px;margin:auto}
+h1{font-size:21px}p{font-size:14px;color:#666;line-height:1.7}.info,.notice{padding:15px;border-radius:10px;text-align:left;font-size:13px;line-height:1.7;margin:18px 0}.info{background:#f0f4f8}.notice{background:#fff4d6}
+.btn{display:block;width:100%;padding:16px 0;border:0;background:#007AFF;color:#fff;text-decoration:none;font-weight:700;font-size:16px;border-radius:10px;box-sizing:border-box;margin-top:10px}.secondary{background:#555}.small{font-size:11px;color:#777;line-height:1.6;margin-top:14px}.status{font-size:13px;line-height:1.7;margin-top:15px}
+</style></head>
+<body><div class="card">
+<h1>スマホ買い替え時期の登録</h1>
+<p>購入から<strong>23か月後</strong>に、買い替え検討のお知らせを設定します。</p>
+<div class="info"><strong>買い替え検討時期：</strong>購入から23か月後<br><strong>通知時刻：</strong>毎日 12:30<br><strong>取扱店舗：</strong>てるてるランド新狭山店<br><strong>TEL：</strong>04-2933-9587<br><strong>営業時間：</strong>10:00〜20:00</div>
+<div class="notice"><strong>ご利用方法</strong><br>下のボタンから、お使いのスマートフォンのカレンダーに予定を登録してください。<br>登録後は、カレンダーアプリが毎日12:30に通知します。</div>
+<div id="buttons"></div><div id="status" class="status"></div>
+<div class="small">※このページ自体が毎日通知を送る仕組みではありません。<br>※通知はスマートフォンのカレンダーアプリが行います。<br>※端末のカレンダー通知がOFFの場合、通知されません。</div>
+</div>
+<script>
+const target=new Date();const original=target.getDate();target.setMonth(target.getMonth()+23);if(target.getDate()!==original)target.setDate(0);
+const pad=n=>String(n).padStart(2,"0"),y=target.getFullYear(),m=pad(target.getMonth()+1),d=pad(target.getDate());
+const start=`${y}${m}${d}T123000`,end=`${y}${m}${d}T130000`;
+const title="スマホ買い替え検討のお知らせ";
+const description="スマートフォンの買い替え時期です。\\n\\n【取扱店舗】\\nてるてるランド新狭山店\\nTEL: 04-2933-9587\\n営業時間: 10:00〜20:00";
+const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Teruteru Land//Smartphone Reminder//JA","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:teruteruland-"+Date.now()+"@teltelland.github.io","DTSTART:"+start,"DTEND:"+end,"SUMMARY:"+title,"DESCRIPTION:"+description,"RRULE:FREQ=DAILY","BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+title,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+const url=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));
+const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const buttons=document.getElementById("buttons");
+if(ios){buttons.innerHTML=`<a class="btn" href="${url}" download="teruteruland-reminder.ics">カレンダーに登録する</a>`}
+else{const g="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title)+"&dates="+start+"/"+end+"&details="+encodeURIComponent(description.replaceAll("\\n","\n"))+"&recur="+encodeURIComponent("RRULE:FREQ=DAILY");buttons.innerHTML=`<a class="btn" href="${g}" target="_blank" rel="noopener">Googleカレンダーに登録する</a><a class="btn secondary" href="${url}" download="teruteruland-reminder.ics">カレンダーファイルで登録する</a>`}
+document.getElementById("status").innerHTML=`<strong>${y}年${Number(m)}月${Number(d)}日</strong>から毎日12:30の予定を登録します。`;
+</script></body></html>
