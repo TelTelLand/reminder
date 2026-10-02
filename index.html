@@ -86,6 +86,13 @@
       margin-bottom: 8px; 
       color: #1967d2; 
     }
+    .store-info {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px dashed #ccc;
+      font-size: 0.85rem;
+      color: #555;
+    }
     .cal-btn { 
       display: flex;
       align-items: center;
@@ -132,6 +139,13 @@
         <button class="cal-btn btn-google">Googleカレンダーに追加</button>
       </a>
       <button class="cal-btn btn-ics" onclick="downloadIcs()">iPhone / カレンダーアプリに追加 (.ics)</button>
+    </div>
+
+    <div class="store-info">
+      <strong>【お問い合わせ先】</strong><br>
+      てるランド新狭山店<br>
+      📞 TEL: 04-2933-9587<br>
+      ⏰ 営業時間: 10:00 〜 20:00
     </div>
   </div>
 
@@ -197,12 +211,13 @@
       const endLocal = formatLocalTime(endDate);
       const untilDateStr = formatDateOnly(targetYear, targetMonth, 25); // 25日まで
 
+      const descriptionText = "スマホ返却・更新手続きの受付期間です。\n店頭（てるランド新狭山店）にてご相談をお受けしております。\n\n【店舗情報】\nてるランド新狭山店\nTEL: 04-2933-9587\n営業時間: 10:00〜20:00";
+
       const title = encodeURIComponent("【スマホ返却】手続き・次回機種変更のご確認");
-      const details = encodeURIComponent("スマホ返却・更新手続きの受付期間です。\n店頭（てるランド新狭山店）にてご相談をお受けしております。");
+      const details = encodeURIComponent(descriptionText);
       const location = encodeURIComponent("てるランド新狭山店");
 
-      // Google Calendar URL (RRULE:FREQ=DAILY;UNTIL=YYYYMMDD)
-      // Googleカレンダーで「毎日25日まで繰り返す」ためのパラメーター設定
+      // Google Calendar URL
       const recurParam = encodeURIComponent(`RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`);
       const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=${recurParam}`;
 
@@ -213,7 +228,7 @@
         "PRODID:-//TelTelLand//NONSGML Calendar//EN",
         "BEGIN:VEVENT",
         "SUMMARY:【スマホ返却】手続き・次回機種変更のご確認",
-        "DESCRIPTION:スマホ返却・更新手続きの受付期間です。店頭（てるランド新狭山店）にてご相談をお受けしております。",
+        "DESCRIPTION:" + descriptionText.replace(/\n/g, "\\n"),
         "LOCATION:てるランド新狭山店",
         `DTSTART:${startLocal}`,
         `DTEND:${endLocal}`,
