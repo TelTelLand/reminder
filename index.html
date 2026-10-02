@@ -3,52 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スマホ返却リマインダー登録（TelTelLand）</title>
+  <title>スマホ返却リマインダー作成 - TelTelLand</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; line-height: 1.6; }
-    .form-group { margin-bottom: 15px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; }
-    input, select, button { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; }
-    button { background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    button:hover { background-color: #0056b3; }
-    .result-box { margin-top: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 5px; display: none; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Segoe UI", sans-serif; padding: 20px; max-width: 500px; margin: auto; line-height: 1.6; color: #333; background-color: #f8f9fa; }
+    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    h2 { text-align: center; font-size: 1.3rem; margin-bottom: 20px; color: #1a73e8; }
+    .form-group { margin-bottom: 18px; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem; }
+    input[type="date"], select { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background-color: #fff; }
+    .btn-submit { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; color: white; background-color: #1a73e8; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    .btn-submit:hover { background-color: #1557b0; }
+    .result-box { margin-top: 25px; padding: 15px; border-radius: 8px; background: #e8f0fe; border: 1px solid #aecbfa; display: none; }
+    .result-title { font-weight: bold; margin-bottom: 8px; color: #1967d2; }
+    .cal-btn { display: block; width: 100%; text-align: center; padding: 12px 0; font-size: 15px; font-weight: bold; color: white; border-radius: 8px; text-decoration: none; margin-top: 10px; border: none; cursor: pointer; }
+    .btn-google { background-color: #4285F4; }
+    .btn-ics { background-color: #34A853; }
   </style>
 </head>
 <body>
 
-  <h2>📱 スマホ返却リマインダー作成</h2>
+  <div class="card">
+    <h2>📱 返却リマインダー登録</h2>
 
-  <div class="form-group">
-    <label for="contractDate">契約日（購入日）:</label>
-    <input type="date" id="contractDate">
-  </div>
+    <div class="form-group">
+      <label for="contractDate">契約日（購入日）</label>
+      <input type="date" id="contractDate">
+    </div>
 
-  <div class="form-group">
-    <label for="monthSelect">通知タイミング:</label>
-    <select id="monthSelect">
-      <option value="23" selected>23ヶ月目（おすすめ）</option>
-      <option value="24">24ヶ月目</option>
-    </select>
-  </div>
+    <div class="form-group">
+      <label for="monthSelect">通知する時期</label>
+      <select id="monthSelect">
+        <!-- JSで1〜48か月目を動的に追加します -->
+      </select>
+    </div>
 
-  <button onclick="generateCalendarLinks()">カレンダー登録リンクを作成</button>
+    <button class="btn-submit" onclick="generateCalendarLinks()">カレンダー登録リンクを作成</button>
 
-  <div id="resultBox" class="result-box">
-    <p><strong>【設定内容】</strong><br><span id="summaryText"></span></p>
-    <a id="googleCalLink" href="#" target="_blank"><button style="background-color: #4285F4;">Googleカレンダーに追加</button></a>
-    <button onclick="downloadIcs()" style="background-color: #34A853; margin-top: 10px;">iPhone / 汎用 (.ics) で追加</button>
+    <div id="resultBox" class="result-box">
+      <div class="result-title">📅 設定予定内容</div>
+      <p id="summaryText" style="margin: 0 0 15px 0; font-size: 0.95rem;"></p>
+      
+      <a id="googleCalLink" href="#" target="_blank" style="text-decoration: none;">
+        <button class="cal-btn btn-google">Googleカレンダーに追加</button>
+      </a>
+      <button class="cal-btn btn-ics" onclick="downloadIcs()">iPhone / カレンダーアプリに追加 (.ics)</button>
+    </div>
   </div>
 
   <script>
-    // 初期値として本日の日付をセット
+    // 本日の日付をデフォルト入力
     document.getElementById('contractDate').valueAsDate = new Date();
+
+    // 1〜48か月目のプルダウンを動的に生成（デフォルトは23か月目）
+    const select = document.getElementById('monthSelect');
+    for (let i = 1; i <= 48; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      if (i === 23) {
+        opt.textContent = `${i}か月目（標準・おすすめ）`;
+        opt.selected = true;
+      } else {
+        opt.textContent = `${i}か月目`;
+      }
+      select.appendChild(opt);
+    }
 
     let globalIcsData = "";
 
     function generateCalendarLinks() {
       const contractInput = document.getElementById('contractDate').value;
       if (!contractInput) {
-        alert("契約日を入力してください");
+        alert("契約日を選択してください");
         return;
       }
 
@@ -58,12 +83,10 @@
       // 開始日：指定月数の3日 12:30
       const startDate = new Date(contractDate.getFullYear(), contractDate.getMonth() + addMonths, 3, 12, 30, 0);
       
-      // 終了日（繰り返しの最終日）：指定月数の25日 13:00（※イベント終了時刻）
-      const endDate = new Date(contractDate.getFullYear(), contractDate.getMonth() + addMonths, 25, 13, 0, 0);
-      // RRULE用UNTIL日付（UTC変換）
+      // 繰り返しの終了判定（25日 23:59:59 UTC）
       const untilDate = new Date(contractDate.getFullYear(), contractDate.getMonth() + addMonths, 25, 23, 59, 59);
 
-      // 日付フォーマット関数 (YYYYMMDDTHHmmssZ)
+      // フォーマット関数
       function formatDateUTC(date) {
         return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
       }
@@ -77,6 +100,7 @@
       }
 
       const startLocal = formatDateLocal(startDate);
+      // イベント終了時間は同日の13:00（30分間）
       const endLocal = formatDateLocal(new Date(contractDate.getFullYear(), contractDate.getMonth() + addMonths, 3, 13, 0, 0));
       const untilUTC = formatDateUTC(untilDate);
 
@@ -84,11 +108,11 @@
       const details = encodeURIComponent(`スマホ返却・更新手続きの受付期間です。\n店頭（てるランド新狭山店）にてご相談をお受けしております。`);
       const location = encodeURIComponent("てるランド新狭山店");
 
-      // Google Calendar Link (RRULE: FREQ=DAILY;UNTIL=...)
+      // Google Calendar 用 URL
       const rrule = `FREQ=DAILY;UNTIL=${untilUTC}`;
       const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=RRULE:${rrule}`;
 
-      // ICS Data (for iPhone / Outlook)
+      // ICS Data (iPhone / Android汎用)
       globalIcsData = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -104,10 +128,10 @@
         "END:VCALENDAR"
       ].join("\n");
 
-      // 表示更新
-      const startStr = `${startDate.getFullYear()}年${startDate.getMonth() + 1}月3日`;
-      const endStr = `${startDate.getFullYear()}年${startDate.getMonth() + 1}月25日`;
-      document.getElementById('summaryText').innerText = `${addMonths}ヶ月目（${startStr} 〜 ${endStr} の毎日12:30に通知）`;
+      // 結果画面の表示
+      const targetYear = startDate.getFullYear();
+      const targetMonth = startDate.getMonth() + 1;
+      document.getElementById('summaryText').innerHTML = `<strong>${addMonths}か月目</strong> の通知設定<br>（${targetYear}年${targetMonth}月3日 〜 25日の毎日12:30）`;
       
       document.getElementById('googleCalLink').href = googleUrl;
       document.getElementById('resultBox').style.display = 'block';
