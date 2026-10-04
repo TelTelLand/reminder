@@ -1,83 +1,72 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマホ買い替え時期カレンダー登録</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f5f5f7; color: #333; }
-        .card { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h1 { font-size: 20px; margin-bottom: 10px; }
-        p { font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.5; }
-        .info { background: #f0f4f8; padding: 15px; border-radius: 8px; text-align: left; font-size: 13px; margin-bottom: 20px; color: #444; line-height: 1.6; }
-        .btn { display: inline-block; width: 100%; padding: 16px 0; background: #007AFF; color: #fff; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,122,255,0.3); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>てるランド新浦安店 - リマインダー登録</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+    .card { background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+    h2 { font-size: 1.25rem; color: #333; margin-top: 0; margin-bottom: 8px; }
+    p { font-size: 0.9rem; color: #666; margin-bottom: 16px; }
+    .info { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: #495057; text-align: left; line-height: 1.5; }
+    .btn { display: block; width: 100%; padding: 14px 0; margin: 10px 0; border-radius: 8px; font-size: 1rem; font-weight: bold; color: #ffffff; text-decoration: none; cursor: pointer; box-sizing: border-box; text-align: center; }
+    .btn-google { background-color: #4285F4; }
+    .btn-ics { background-color: #34A853; }
+    .btn-tel { background-color: #ff9800; }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>スマホ買い替え検討期間の登録</h1>
-        <p>下のボタンを押すと、お使いのスマホのカレンダーに予定（23か月後の1日〜25日／12:30通知）が追加されます。</p>
-        
-        <div class="info">
-            <strong>【取扱店舗】</strong><br>
-            てるてるランド新浦安店<br>
-            TEL: 047-390-8515<br>
-            営業時間: 10:00〜20:30
-        </div>
+  <div class="card">
+    <h2>てるランド新浦安店<br>リマインダー登録</h2>
+    <p>23ヶ月後の買い替え時期（返却目安）をカレンダーに登録します。</p>
 
-        <div id="action-area"></div>
+    <div class="info">
+      <strong>【店舗情報】</strong><br>
+      営業時間：10:00〜20:30<br>
+      TEL：047-390-8515
     </div>
+    
+    <a id="google-link" class="btn btn-google" target="_blank" rel="noopener">Googleカレンダーに追加</a>
+    <a id="ics-link" class="btn btn-ics" download="reminder.ics">iPhone / その他（.ics）</a>
+    <a href="tel:0473908515" class="btn btn-tel">店舗へ電話をかける</a>
+  </div>
 
-    <script>
-        const now = new Date();
-        let targetYear = now.getFullYear();
-        let targetMonth = now.getMonth() + 23;
+  <script>
+    const storeName = 'てるランド新浦安店';
+    const storeTel = '047-390-8515';
+    const storeHours = '10:00〜20:30';
 
-        targetYear += Math.floor(targetMonth / 12);
-        targetMonth = targetMonth % 12;
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + 23, now.getDate());
 
-        const pad = (n) => String(n).padStart(2, '0');
-        const yearStr = targetYear;
-        const monthStr = pad(targetMonth + 1);
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
 
-        const startIso = `${yearStr}${monthStr}01T123000`;
-        const endIso = `${yearStr}${monthStr}25T130000`;
+    const dateStr = `${year}${month}${day}`;
+    const nextDayStr = `${year}${month}${String(targetDate.getDate() + 1).padStart(2, '0')}`;
 
-        const title = "スマホ買い替え検討期間";
-        const detailsText = "スマホの買い替え・機種変更のご案内期間です。\n\n【店舗情報】\nてるてるランド新浦安店\nTEL: 047-390-8515\n営業時間: 10:00〜20:30";
+    const eventTitle = encodeURIComponent(`【${storeName}】端末次回買い替え・返却のご案内`);
+    const eventDetails = encodeURIComponent(`お得な買い替え・次回返却時期の目安です。\nTEL: ${storeTel}\n営業時間: ${storeHours}\nお気軽にご相談ください！`);
 
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const area = document.getElementById('action-area');
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dateStr}/${nextDayStr}&details=${eventDetails}`;
+    document.getElementById('google-link').href = googleUrl;
 
-        if (isIOS) {
-            const icsDetails = detailsText.replace(/\n/g, '\\n');
-            const icsData = [
-                'BEGIN:VCALENDAR',
-                'VERSION:2.0',
-                'PRODID:-//Shop//Event//EN',
-                'BEGIN:VEVENT',
-                `SUMMARY:${title}`,
-                `DESCRIPTION:${icsDetails}`,
-                `DTSTART:${startIso}`,
-                `DTEND:${endIso}`,
-                'BEGIN:VALARM',
-                'ACTION:DISPLAY',
-                'DESCRIPTION:Reminder',
-                'TRIGGER:PT0M',
-                'END:VALARM',
-                'END:VEVENT',
-                'END:VCALENDAR'
-            ].join('\r\n');
+    const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//TelTelLand//Reminder//JA
+BEGIN:VEVENT
+SUMMARY:【${storeName}】端末次回買い替え・返却のご案内
+DESCRIPTION:お得な買い替え・次回返却時期の目安です。\\nTEL: ${storeTel}\\n営業時間: ${storeHours}\\nお気軽にご相談ください！
+DTSTART;VALUE=DATE:${dateStr}
+DTEND;VALUE=DATE:${nextDayStr}
+END:VEVENT
+END:VCALENDAR`;
 
-            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            area.innerHTML = `<a href="${url}" download="reminder.ics" class="btn">カレンダーに追加する</a>`;
-        } else {
-            const gTitle = encodeURIComponent(title);
-            const gDetails = encodeURIComponent(detailsText);
-            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gTitle}&dates=${startIso}/${endIso}&details=${gDetails}`;
-            area.innerHTML = `<a href="${calendarUrl}" class="btn">Googleカレンダーに追加する</a>`;
-        }
-    </script>
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    document.getElementById('ics-link').href = URL.createObjectURL(blob);
+  </script>
 </body>
 </html>
