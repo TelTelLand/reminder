@@ -138,6 +138,11 @@
         `DTSTART:${startLocal}`,
         `DTEND:${endLocal}`,
         `RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`,
+        "BEGIN:VALARM",
+        "TRIGGER:PT0M",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:Reminder",
+        "END:VALARM",
         "END:VEVENT",
         "END:VCALENDAR"
       ].join("\r\n");
