@@ -221,7 +221,7 @@
       const recurParam = encodeURIComponent(`RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`);
       const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=${recurParam}`;
 
-      // ICS Data (iPhone / 汎用)
+      // ICS Data (iPhone / 汎用) - VALARM（通知設定）を追加
       globalIcsData = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -233,6 +233,11 @@
         `DTSTART:${startLocal}`,
         `DTEND:${endLocal}`,
         `RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`,
+        "BEGIN:VALARM",
+        "TRIGGER:PT0M",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:Reminder",
+        "END:VALARM",
         "END:VEVENT",
         "END:VCALENDAR"
       ].join("\r\n");
