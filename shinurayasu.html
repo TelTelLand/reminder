@@ -3,70 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>てるランド新浦安店 - リマインダー登録</title>
+  <title>スマホ返却リマインダー作成 - てるランド新浦安店</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .card { background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-    h2 { font-size: 1.25rem; color: #333; margin-top: 0; margin-bottom: 8px; }
-    p { font-size: 0.9rem; color: #666; margin-bottom: 16px; }
-    .info { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.85rem; color: #495057; text-align: left; line-height: 1.5; }
-    .btn { display: block; width: 100%; padding: 14px 0; margin: 10px 0; border-radius: 8px; font-size: 1rem; font-weight: bold; color: #ffffff; text-decoration: none; cursor: pointer; box-sizing: border-box; text-align: center; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Segoe UI", sans-serif; padding: 20px 15px; max-width: 480px; margin: auto; line-height: 1.6; color: #333; background-color: #f4f6f8; }
+    .card { background: #fff; padding: 24px 20px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    h2 { text-align: center; font-size: 1.25rem; margin-top: 0; margin-bottom: 20px; color: #1a73e8; }
+    .form-group { margin-bottom: 18px; width: 100%; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem; color: #444; }
+    input[type="date"], select { width: 100%; height: 48px; padding: 0 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; background-color: #fff; appearance: none; -webkit-appearance: none; }
+    select { background-image: url('data:image/svg+xml;utf8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
+    .btn-submit { width: 100%; height: 50px; font-size: 16px; font-weight: bold; color: white; background-color: #1a73e8; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
+    .btn-submit:active { background-color: #1557b0; }
+    .result-box { margin-top: 25px; padding: 16px; border-radius: 10px; background: #e8f0fe; border: 1px solid #aecbfa; display: none; }
+    .result-title { font-weight: bold; margin-bottom: 8px; color: #1967d2; }
+    .store-info { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 0.85rem; color: #555; }
+    .cal-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; font-size: 15px; font-weight: bold; color: white; border-radius: 8px; text-decoration: none; margin-top: 10px; border: none; cursor: pointer; }
     .btn-google { background-color: #4285F4; }
     .btn-ics { background-color: #34A853; }
-    .btn-tel { background-color: #ff9800; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>てるランド新浦安店<br>リマインダー登録</h2>
-    <p>23ヶ月後の買い替え時期（返却目安）をカレンダーに登録します。</p>
 
-    <div class="info">
-      <strong>【店舗情報】</strong><br>
-      営業時間：10:00〜20:30<br>
-      TEL：047-390-8515
+  <div class="card">
+    <h2>📱 返却リマインダー登録</h2>
+
+    <div class="form-group">
+      <label for="contractDate">契約日（購入日）</label>
+      <input type="date" id="contractDate">
     </div>
-    
-    <a id="google-link" class="btn btn-google" target="_blank" rel="noopener">Googleカレンダーに追加</a>
-    <a id="ics-link" class="btn btn-ics" download="reminder.ics">iPhone / その他（.ics）</a>
-    <a href="tel:0473908515" class="btn btn-tel">店舗へ電話をかける</a>
+
+    <div class="form-group">
+      <label for="monthSelect">通知する時期</label>
+      <select id="monthSelect"></select>
+    </div>
+
+    <button class="btn-submit" onclick="generateCalendarLinks()">カレンダー登録リンクを作成</button>
+
+    <div id="resultBox" class="result-box">
+      <div class="result-title">📅 設定予定内容</div>
+      <p id="summaryText" style="margin: 0 0 15px 0; font-size: 0.95rem;"></p>
+      
+      <a id="googleCalLink" href="#" target="_blank" style="text-decoration: none;">
+        <button class="cal-btn btn-google">Googleカレンダーに追加</button>
+      </a>
+      <button class="cal-btn btn-ics" onclick="downloadIcs()">iPhone / カレンダーアプリに追加 (.ics)</button>
+    </div>
+
+    <div class="store-info">
+      <strong>【お問い合わせ先】</strong><br>
+      てるランド新浦安店<br>
+      📞 TEL: 047-390-8515<br>
+      ⏰ 営業時間: 10:00 〜 20:30
+    </div>
   </div>
 
   <script>
-    const storeName = 'てるランド新浦安店';
-    const storeTel = '047-390-8515';
-    const storeHours = '10:00〜20:30';
+    const storeName = "てるランド新浦安店";
+    const storeTel = "047-390-8515";
+    const storeHours = "10:00〜20:30";
 
-    const now = new Date();
-    const targetDate = new Date(now.getFullYear(), now.getMonth() + 23, now.getDate());
+    document.getElementById('contractDate').valueAsDate = new Date();
 
-    const year = targetDate.getFullYear();
-    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const day = String(targetDate.getDate()).padStart(2, '0');
+    const select = document.getElementById('monthSelect');
+    for (let i = 1; i <= 48; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      if (i === 23) {
+        opt.textContent = `${i}か月目（標準・おすすめ）`;
+        opt.selected = true;
+      } else {
+        opt.textContent = `${i}か月目`;
+      }
+      select.appendChild(opt);
+    }
 
-    const dateStr = `${year}${month}${day}`;
-    const nextDayStr = `${year}${month}${String(targetDate.getDate() + 1).padStart(2, '0')}`;
+    let globalIcsData = "";
 
-    const eventTitle = encodeURIComponent(`【${storeName}】端末次回買い替え・返却のご案内`);
-    const eventDetails = encodeURIComponent(`お得な買い替え・次回返却時期の目安です。\nTEL: ${storeTel}\n営業時間: ${storeHours}\nお気軽にご相談ください！`);
+    function generateCalendarLinks() {
+      const contractInput = document.getElementById('contractDate').value;
+      if (!contractInput) {
+        alert("契約日を選択してください");
+        return;
+      }
 
-    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${dateStr}/${nextDayStr}&details=${eventDetails}`;
-    document.getElementById('google-link').href = googleUrl;
+      const addMonths = parseInt(document.getElementById('monthSelect').value);
+      const parts = contractInput.split('-');
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
 
-    const icsContent = 
-`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//TelTelLand//Reminder//JA
-BEGIN:VEVENT
-SUMMARY:【${storeName}】端末次回買い替え・返却のご案内
-DESCRIPTION:お得な買い替え・次回返却時期の目安です。\\nTEL: ${storeTel}\\n営業時間: ${storeHours}\\nお気軽にご相談ください！
-DTSTART;VALUE=DATE:${dateStr}
-DTEND;VALUE=DATE:${nextDayStr}
-END:VEVENT
-END:VCALENDAR`;
+      const targetDate = new Date(year, month + addMonths, 1);
+      const targetYear = targetDate.getFullYear();
+      const targetMonth = targetDate.getMonth();
 
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    document.getElementById('ics-link').href = URL.createObjectURL(blob);
+      const startDate = new Date(targetYear, targetMonth, 3, 12, 30, 0);
+      const endDate = new Date(targetYear, targetMonth, 3, 13, 0, 0);
+
+      function formatLocalTime(d) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${yyyy}${mm}${dd}T${hh}${mi}00`;
+      }
+
+      function formatDateOnly(yyyy, mm, dd) {
+        const m = String(mm + 1).padStart(2, '0');
+        const d = String(dd).padStart(2, '0');
+        return `${yyyy}${m}${d}`;
+      }
+
+      const startLocal = formatLocalTime(startDate);
+      const endLocal = formatLocalTime(endDate);
+      const untilDateStr = formatDateOnly(targetYear, targetMonth, 25);
+
+      const descriptionText = `スマホ返却・更新手続きの受付期間です。\n店頭（${storeName}）にてご相談をお受けしております。\n\n【店舗情報】\n${storeName}\nTEL: ${storeTel}\n営業時間: ${storeHours}`;
+
+      const title = encodeURIComponent("【スマホ返却】手続き・次回機種変更のご確認");
+      const details = encodeURIComponent(descriptionText);
+      const location = encodeURIComponent(storeName);
+
+      const recurParam = encodeURIComponent(`RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`);
+      const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=${recurParam}`;
+
+      globalIcsData = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//TelTelLand//NONSGML Calendar//EN",
+        "BEGIN:VEVENT",
+        "SUMMARY:【スマホ返却】手続き・次回機種変更のご確認",
+        "DESCRIPTION:" + descriptionText.replace(/\n/g, "\\n"),
+        `LOCATION:${storeName}`,
+        `DTSTART:${startLocal}`,
+        `DTEND:${endLocal}`,
+        `RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`,
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+
+      document.getElementById('summaryText').innerHTML = `<strong>${addMonths}か月目</strong> の通知設定<br>（${targetYear}年${targetMonth + 1}月3日 〜 25日の毎日12:30）`;
+      document.getElementById('googleCalLink').href = googleUrl;
+      document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function downloadIcs() {
+      if (!globalIcsData) return;
+      const blob = new Blob([globalIcsData], { type: 'text/calendar;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'smartphone_reminder.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   </script>
+
 </body>
 </html>
