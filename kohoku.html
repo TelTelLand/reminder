@@ -1,83 +1,163 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマホ買い替え時期カレンダー登録</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f5f5f7; color: #333; }
-        .card { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h1 { font-size: 20px; margin-bottom: 10px; }
-        p { font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.5; }
-        .info { background: #f0f4f8; padding: 15px; border-radius: 8px; text-align: left; font-size: 13px; margin-bottom: 20px; color: #444; line-height: 1.6; }
-        .btn { display: inline-block; width: 100%; padding: 16px 0; background: #007AFF; color: #fff; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,122,255,0.3); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スマホ返却リマインダー作成 - てるランド港北ミナモ店</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Segoe UI", sans-serif; padding: 20px 15px; max-width: 480px; margin: auto; line-height: 1.6; color: #333; background-color: #f4f6f8; }
+    .card { background: #fff; padding: 24px 20px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    h2 { text-align: center; font-size: 1.25rem; margin-top: 0; margin-bottom: 20px; color: #1a73e8; }
+    .form-group { margin-bottom: 18px; width: 100%; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 0.95rem; color: #444; }
+    input[type="date"], select { width: 100%; height: 48px; padding: 0 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; background-color: #fff; appearance: none; -webkit-appearance: none; }
+    select { background-image: url('data:image/svg+xml;utf8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; }
+    .btn-submit { width: 100%; height: 50px; font-size: 16px; font-weight: bold; color: white; background-color: #1a73e8; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
+    .btn-submit:active { background-color: #1557b0; }
+    .result-box { margin-top: 25px; padding: 16px; border-radius: 10px; background: #e8f0fe; border: 1px solid #aecbfa; display: none; }
+    .result-title { font-weight: bold; margin-bottom: 8px; color: #1967d2; }
+    .store-info { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; font-size: 0.85rem; color: #555; }
+    .cal-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; font-size: 15px; font-weight: bold; color: white; border-radius: 8px; text-decoration: none; margin-top: 10px; border: none; cursor: pointer; }
+    .btn-google { background-color: #4285F4; }
+    .btn-ics { background-color: #34A853; }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>スマホ買い替え検討期間の登録</h1>
-        <p>下のボタンを押すと、お使いのスマホのカレンダーに予定（23か月後の1日〜25日／12:30通知）が追加されます。</p>
-        
-        <div class="info">
-            <strong>【取扱店舗】</strong><br>
-            てるてるランド港北ミナモ店<br>
-            TEL: 045-590-0102<br>
-            営業時間: 10:00〜20:00
-        </div>
 
-        <div id="action-area"></div>
+  <div class="card">
+    <h2>📱 返却リマインダー登録</h2>
+
+    <div class="form-group">
+      <label for="contractDate">契約日（購入日）</label>
+      <input type="date" id="contractDate">
     </div>
 
-    <script>
-        const now = new Date();
-        let targetYear = now.getFullYear();
-        let targetMonth = now.getMonth() + 23;
+    <div class="form-group">
+      <label for="monthSelect">通知する時期</label>
+      <select id="monthSelect"></select>
+    </div>
 
-        targetYear += Math.floor(targetMonth / 12);
-        targetMonth = targetMonth % 12;
+    <button class="btn-submit" onclick="generateCalendarLinks()">カレンダー登録リンクを作成</button>
 
-        const pad = (n) => String(n).padStart(2, '0');
-        const yearStr = targetYear;
-        const monthStr = pad(targetMonth + 1);
+    <div id="resultBox" class="result-box">
+      <div class="result-title">📅 設定予定内容</div>
+      <p id="summaryText" style="margin: 0 0 15px 0; font-size: 0.95rem;"></p>
+      
+      <a id="googleCalLink" href="#" target="_blank" style="text-decoration: none;">
+        <button class="cal-btn btn-google">Googleカレンダーに追加</button>
+      </a>
+      <button class="cal-btn btn-ics" onclick="downloadIcs()">iPhone / カレンダーアプリに追加 (.ics)</button>
+    </div>
 
-        const startIso = `${yearStr}${monthStr}01T123000`;
-        const endIso = `${yearStr}${monthStr}25T130000`;
+    <div class="store-info">
+      <strong>【お問い合わせ先】</strong><br>
+      てるランド港北ミナモ店<br>
+      📞 TEL: 045-590-0102<br>
+      ⏰ 営業時間: 10:00 〜 20:00
+    </div>
+  </div>
 
-        const title = "スマホ買い替え検討期間";
-        const detailsText = "スマホの買い替え・機種変更のご案内期間です。\n\n【店舗情報】\nてるてるランド港北ミナモ店\nTEL: 045-590-0102\n営業時間: 10:00〜20:00";
+  <script>
+    const storeName = "てるランド港北ミナモ店";
+    const storeTel = "045-590-0102";
+    const storeHours = "10:00〜20:00";
 
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const area = document.getElementById('action-area');
+    document.getElementById('contractDate').valueAsDate = new Date();
 
-        if (isIOS) {
-            const icsDetails = detailsText.replace(/\n/g, '\\n');
-            const icsData = [
-                'BEGIN:VCALENDAR',
-                'VERSION:2.0',
-                'PRODID:-//Shop//Event//EN',
-                'BEGIN:VEVENT',
-                `SUMMARY:${title}`,
-                `DESCRIPTION:${icsDetails}`,
-                `DTSTART:${startIso}`,
-                `DTEND:${endIso}`,
-                'BEGIN:VALARM',
-                'ACTION:DISPLAY',
-                'DESCRIPTION:Reminder',
-                'TRIGGER:PT0M',
-                'END:VALARM',
-                'END:VEVENT',
-                'END:VCALENDAR'
-            ].join('\r\n');
+    const select = document.getElementById('monthSelect');
+    for (let i = 1; i <= 48; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      if (i === 23) {
+        opt.textContent = `${i}か月目（標準・おすすめ）`;
+        opt.selected = true;
+      } else {
+        opt.textContent = `${i}か月目`;
+      }
+      select.appendChild(opt);
+    }
 
-            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            area.innerHTML = `<a href="${url}" download="reminder.ics" class="btn">カレンダーに追加する</a>`;
-        } else {
-            const gTitle = encodeURIComponent(title);
-            const gDetails = encodeURIComponent(detailsText);
-            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gTitle}&dates=${startIso}/${endIso}&details=${gDetails}`;
-            area.innerHTML = `<a href="${calendarUrl}" class="btn">Googleカレンダーに追加する</a>`;
-        }
-    </script>
+    let globalIcsData = "";
+
+    function generateCalendarLinks() {
+      const contractInput = document.getElementById('contractDate').value;
+      if (!contractInput) {
+        alert("契約日を選択してください");
+        return;
+      }
+
+      const addMonths = parseInt(document.getElementById('monthSelect').value);
+      const parts = contractInput.split('-');
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+
+      const targetDate = new Date(year, month + addMonths, 1);
+      const targetYear = targetDate.getFullYear();
+      const targetMonth = targetDate.getMonth();
+
+      const startDate = new Date(targetYear, targetMonth, 3, 12, 30, 0);
+      const endDate = new Date(targetYear, targetMonth, 3, 13, 0, 0);
+
+      function formatLocalTime(d) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${yyyy}${mm}${dd}T${hh}${mi}00`;
+      }
+
+      function formatDateOnly(yyyy, mm, dd) {
+        const m = String(mm + 1).padStart(2, '0');
+        const d = String(dd).padStart(2, '0');
+        return `${yyyy}${m}${d}`;
+      }
+
+      const startLocal = formatLocalTime(startDate);
+      const endLocal = formatLocalTime(endDate);
+      const untilDateStr = formatDateOnly(targetYear, targetMonth, 25);
+
+      const descriptionText = `スマホ返却・更新手続きの受付期間です。\n店頭（${storeName}）にてご相談をお受けしております。\n\n【店舗情報】\n${storeName}\nTEL: ${storeTel}\n営業時間: ${storeHours}`;
+
+      const title = encodeURIComponent("【スマホ返却】手続き・次回機種変更のご確認");
+      const details = encodeURIComponent(descriptionText);
+      const location = encodeURIComponent(storeName);
+
+      const recurParam = encodeURIComponent(`RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`);
+      const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startLocal}/${endLocal}&details=${details}&location=${location}&recur=${recurParam}`;
+
+      globalIcsData = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//TelTelLand//NONSGML Calendar//EN",
+        "BEGIN:VEVENT",
+        "SUMMARY:【スマホ返却】手続き・次回機種変更のご確認",
+        "DESCRIPTION:" + descriptionText.replace(/\n/g, "\\n"),
+        `LOCATION:${storeName}`,
+        `DTSTART:${startLocal}`,
+        `DTEND:${endLocal}`,
+        `RRULE:FREQ=DAILY;UNTIL=${untilDateStr}T235959Z`,
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+
+      document.getElementById('summaryText').innerHTML = `<strong>${addMonths}か月目</strong> の通知設定<br>（${targetYear}年${targetMonth + 1}月3日 〜 25日の毎日12:30）`;
+      document.getElementById('googleCalLink').href = googleUrl;
+      document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function downloadIcs() {
+      if (!globalIcsData) return;
+      const blob = new Blob([globalIcsData], { type: 'text/calendar;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'smartphone_reminder.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+
 </body>
 </html>
